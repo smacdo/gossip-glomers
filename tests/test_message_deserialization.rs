@@ -1,23 +1,8 @@
-use gossip_glomers::MaelstromMessage;
-use serde::{Deserialize, Serialize};
+mod messages;
 
-#[derive(Serialize, Deserialize, Debug, PartialEq)]
-#[serde(tag = "type")]
-#[serde(rename_all = "snake_case")]
-enum Messages {
-    Test,
-    Test2 {
-        a: usize,
-        b: usize,
-    },
-    Echo {
-        message: String,
-    },
-    Init {
-        node_id: String,
-        node_ids: Vec<String>,
-    },
-}
+use messages::Messages;
+
+use gossip_glomers::Message;
 
 #[test]
 fn parse_simple_maelstrom_message() {
@@ -32,7 +17,7 @@ fn parse_simple_maelstrom_message() {
       }
     }
     "#;
-    let m: MaelstromMessage<Messages> = serde_json::from_str(message).unwrap();
+    let m: Message<Messages> = serde_json::from_str(message).unwrap();
 
     assert_eq!(m.src(), "alice");
     assert_eq!(m.dest(), "bob");
@@ -55,7 +40,7 @@ fn parse_message_with_typed_fields() {
       }
     }
     "#;
-    let m: MaelstromMessage<Messages> = serde_json::from_str(message).unwrap();
+    let m: Message<Messages> = serde_json::from_str(message).unwrap();
 
     assert_eq!(m.src(), "alice");
     assert_eq!(m.dest(), "bob");
@@ -76,7 +61,7 @@ fn parse_message_with_string_typed_fields() {
       }
     }
     "#;
-    let m: MaelstromMessage<Messages> = serde_json::from_str(message).unwrap();
+    let m: Message<Messages> = serde_json::from_str(message).unwrap();
 
     assert_eq!(m.src(), "alice");
     assert_eq!(m.dest(), "bob");
@@ -103,7 +88,7 @@ fn parse_init_message() {
       }
     }
     "#;
-    let m: MaelstromMessage<Messages> = serde_json::from_str(message).unwrap();
+    let m: Message<Messages> = serde_json::from_str(message).unwrap();
 
     assert_eq!(m.src(), "alice");
     assert_eq!(m.dest(), "bob");

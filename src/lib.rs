@@ -1,18 +1,28 @@
+pub mod io;
+pub mod node;
+
+use std::fmt::Debug;
+
 use serde::{Deserialize, Serialize};
 
 // TODO: serialization
 // TODO: add unit tests for these methods.
 
-#[derive(Serialize, Deserialize, Debug)]
-pub struct MaelstromMessage<T> {
+pub trait NodeMessage: Debug + PartialEq /* + Send + Sync */ {}
+
+#[derive(Serialize, Deserialize, Debug, PartialEq)]
+pub struct Message<T: NodeMessage> {
     src: String,
     dest: String,
     body: BodyWithTypedData<T>,
 }
 
-impl<T> MaelstromMessage<T> {
+impl<T> Message<T>
+where
+    T: NodeMessage,
+{
     pub fn new(src: String, dest: String, msg_id: Option<usize>, body: T) -> Self {
-        MaelstromMessage {
+        Message {
             src,
             dest,
             body: BodyWithTypedData {
@@ -30,7 +40,7 @@ impl<T> MaelstromMessage<T> {
         msg_id: Option<usize>,
         body: T,
     ) -> Self {
-        MaelstromMessage {
+        Message {
             src,
             dest,
             body: BodyWithTypedData {
@@ -62,10 +72,15 @@ impl<T> MaelstromMessage<T> {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug)]
-struct BodyWithTypedData<T> {
+#[derive(Serialize, Deserialize, Debug, PartialEq)]
+struct BodyWithTypedData<T>
+where
+    T: NodeMessage,
+{
     #[serde(flatten)]
     typed: T,
+    #[serde(skip_serializing_if = "Option::is_none")]
     msg_id: Option<usize>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     in_reply_to: Option<usize>,
 }

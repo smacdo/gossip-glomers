@@ -1,9 +1,11 @@
 // TODO: use tracing
 
 use clap::Parser;
-use std::io::BufRead;
-use tracing::Level;
-use tracing_subscriber::{EnvFilter, layer::SubscriberExt, util::SubscriberInitExt};
+use gossip_glomers::{
+    io::{MessageReader, MessageReaderError, StdinMessageReader},
+    node::XYZNodeMessage,
+};
+use tracing_subscriber::EnvFilter;
 
 #[derive(Parser, Debug)]
 struct Args {
@@ -20,6 +22,8 @@ fn main() -> anyhow::Result<()> {
 
     if args.verbose {
         filter = filter.add_directive("debug".parse().unwrap());
+    } else {
+        filter = filter.add_directive("info".parse().unwrap());
     }
 
     tracing_subscriber::fmt()
@@ -29,36 +33,25 @@ fn main() -> anyhow::Result<()> {
 
     // Incoming messages are received as JSON values from stdin. Each message is
     // separated by a newline.
-    eprintln!("gossip-glomer node started - type 'q' or 'quit' to exit");
-
-    let mut line_buffer = String::new();
+    tracing::info!("gossip-glomer node started - type 'q' or 'quit' to exit");
+    let reader: StdinMessageReader<XYZNodeMessage> = StdinMessageReader::new();
 
     loop {
-        // Read the next message from stdin.
-        let bytes_read = std::io::stdin().lock().read_line(&mut line_buffer)?;
-        let line = line_buffer.trim();
-
-        tracing::debug!("read {} bytes from stdin: `{}`", bytes_read, line);
-
-        // Quit if there are no more bytes to read from stdin. This happens when
-        // the host application (Maelstrom) tries to terminate the node by
-        // closing stdin.
-        if bytes_read == 0 {
-            tracing::info!("EOF received, exiting...");
-            break;
+        match reader.read() {
+            Ok(message) => {
+                // TODO: handle the message.
+                tracing::debug!("GOT: {message:?}");
+            }
+            Err(MessageReaderError::Closed) | Err(MessageReaderError::Quit) => {
+                break;
+            }
+            Err(e) => {
+                tracing::error!("{e}");
+            }
         }
-
-        // Did the user ask to quit?
-        if line == "q" || line == "quit" {
-            tracing::info!("quit received, exiting...");
-            break;
-        }
-
-        // Process the input as a JSON message.
-
-        // Clear the input before reading the next line from stdin.
-        line_buffer.clear();
     }
+
+    tracing::info!("gossip-glomer node stopped");
 
     Ok(())
 }
