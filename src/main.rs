@@ -2,10 +2,31 @@
 
 use clap::Parser;
 use gossip_glomers::{
-    io::{MessageReader, MessageReaderError, StdinMessageReader},
-    node::XYZNodeMessage,
+    NodeMessage,
+    io::{StdinMessageReader, StdoutMessageWriter},
+    node::Node,
 };
+use serde::{Deserialize, Serialize};
 use tracing_subscriber::EnvFilter;
+
+#[derive(Serialize, Deserialize, Debug, PartialEq)]
+#[serde(tag = "type")]
+#[serde(rename_all = "snake_case")]
+pub enum EchoNodeMessage {
+    Init {
+        node_id: String,
+        node_ids: Vec<String>,
+    },
+    InitOk,
+    Echo {
+        echo: String,
+    },
+    EchoOk {
+        echo: String,
+    },
+}
+
+impl NodeMessage for EchoNodeMessage {}
 
 #[derive(Parser, Debug)]
 struct Args {
@@ -31,27 +52,8 @@ fn main() -> anyhow::Result<()> {
         .with_writer(std::io::stderr)
         .init();
 
-    // Incoming messages are received as JSON values from stdin. Each message is
-    // separated by a newline.
-    tracing::info!("gossip-glomer node started - type 'q' or 'quit' to exit");
-    let reader: StdinMessageReader<XYZNodeMessage> = StdinMessageReader::new();
-
-    loop {
-        match reader.read() {
-            Ok(message) => {
-                // TODO: handle the message.
-                tracing::debug!("GOT: {message:?}");
-            }
-            Err(MessageReaderError::Closed) | Err(MessageReaderError::Quit) => {
-                break;
-            }
-            Err(e) => {
-                tracing::error!("{e}");
-            }
-        }
-    }
-
-    tracing::info!("gossip-glomer node stopped");
-
-    Ok(())
+    // Create a network node and run it.
+    let mut node: Node<EchoNodeMessage, _, _> =
+        Node::new(StdinMessageReader::new(), StdoutMessageWriter::new());
+    Ok(node.run()?)
 }
