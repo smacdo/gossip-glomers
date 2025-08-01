@@ -33,19 +33,13 @@ where
         }
     }
 
-    pub fn new_reply(
-        src: String,
-        dest: String,
-        reply_to: usize,
-        msg_id: Option<usize>,
-        body: T,
-    ) -> Self {
+    pub fn new_reply(src: String, dest: String, reply_to: usize, msg_id: usize, body: T) -> Self {
         Message {
             src,
             dest,
             body: BodyWithTypedData {
                 typed: body,
-                msg_id,
+                msg_id: Some(msg_id),
                 in_reply_to: Some(reply_to),
             },
         }

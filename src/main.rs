@@ -4,7 +4,7 @@ use clap::Parser;
 use gossip_glomers::{
     NodeMessage,
     io::{StdinMessageReader, StdoutMessageWriter},
-    node::Node,
+    node::{CreatesInitOkMessage, InitMessage, Node, TryIntoInitMessage},
 };
 use serde::{Deserialize, Serialize};
 use tracing_subscriber::EnvFilter;
@@ -27,6 +27,24 @@ pub enum EchoNodeMessage {
 }
 
 impl NodeMessage for EchoNodeMessage {}
+
+impl TryIntoInitMessage for EchoNodeMessage {
+    fn try_into_init_message(&self) -> Option<InitMessage> {
+        match self {
+            EchoNodeMessage::Init { node_id, node_ids } => Some(InitMessage {
+                node_id: node_id.clone(),
+                node_ids: node_ids.clone(),
+            }),
+            _ => None,
+        }
+    }
+}
+
+impl CreatesInitOkMessage for EchoNodeMessage {
+    fn create_init_ok() -> Self {
+        EchoNodeMessage::InitOk
+    }
+}
 
 #[derive(Parser, Debug)]
 struct Args {

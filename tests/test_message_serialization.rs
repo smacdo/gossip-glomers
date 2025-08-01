@@ -40,7 +40,7 @@ fn serialize_message_with_reply_to() {
         "alice".to_string(),
         "bob".to_string(),
         7,
-        Some(10),
+        10,
         Messages::Test,
     );
 
