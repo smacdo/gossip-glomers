@@ -23,4 +23,7 @@ COPY --from=rust_builder /app/target/release/gossip-glomers .
 
 EXPOSE 8080
 
-CMD ["/opt/maelstrom/maelstrom test -w echo --bin /app/gossip-glomers --time-limit 5"]
+ENV RUST_LOG="debug"
+ENV RUST_BACKTRACE=1
+
+CMD ["/opt/maelstrom/maelstrom", "test", "--log-stderr", "-w", "echo", "--bin", "/app/gossip-glomers", "--time-limit", "5"]

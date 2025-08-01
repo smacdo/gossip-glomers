@@ -38,7 +38,6 @@ fn main() -> anyhow::Result<()> {
     let args = Args::parse();
 
     // Set up logging
-    // TODO: Maelstrom expects debug info like logs to be written to stderr.
     let mut filter = EnvFilter::from_default_env();
 
     if args.verbose {
@@ -55,5 +54,6 @@ fn main() -> anyhow::Result<()> {
     // Create a network node and run it.
     let mut node: Node<EchoNodeMessage, _, _> =
         Node::new(StdinMessageReader::new(), StdoutMessageWriter::new());
+
     Ok(node.run()?)
 }
