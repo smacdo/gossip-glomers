@@ -1,6 +1,6 @@
 mod messages;
 
-use messages::Messages;
+use messages::TestNodeMessage;
 
 use gossip_glomers::Message;
 use serde_json::{Value, json};
@@ -11,7 +11,7 @@ fn serialize_test_maelstrom_message() {
         "alice".to_string(),
         "bob".to_string(),
         Some(10),
-        Messages::Test2 { a: 42, b: 22 },
+        TestNodeMessage::Test2 { a: 42, b: 22 },
     );
 
     let s = serde_json::to_string(&og_message).unwrap();
@@ -41,7 +41,7 @@ fn serialize_message_with_reply_to() {
         "bob".to_string(),
         7,
         10,
-        Messages::Test,
+        TestNodeMessage::Test,
     );
 
     let s = serde_json::to_string(&og_message).unwrap();
@@ -65,7 +65,12 @@ fn serialize_message_with_reply_to() {
 
 #[test]
 fn serialize_message_with_no_id_or_reply_to() {
-    let og_message = Message::new("alice".to_string(), "bob".to_string(), None, Messages::Test);
+    let og_message = Message::new(
+        "alice".to_string(),
+        "bob".to_string(),
+        None,
+        TestNodeMessage::Test,
+    );
 
     let s = serde_json::to_string(&og_message).unwrap();
     let json_obj: Value = serde_json::from_str(&s).unwrap();

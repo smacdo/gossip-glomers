@@ -28,7 +28,7 @@ where
 {
     /// Returns the next unread message from the reader. This method will block
     /// until a message is available.
-    fn read(&self) -> Result<Message<T>, MessageReaderError>;
+    fn read(&mut self) -> Result<Message<T>, MessageReaderError>;
 }
 
 pub struct StdinMessageReader<T>
@@ -55,7 +55,7 @@ impl<T> MessageReader<T> for StdinMessageReader<T>
 where
     T: NodeMessage + DeserializeOwned,
 {
-    fn read(&self) -> Result<Message<T>, MessageReaderError> {
+    fn read(&mut self) -> Result<Message<T>, MessageReaderError> {
         let mut line_buffer = self.line_buffer.borrow_mut();
         line_buffer.clear();
 
@@ -106,7 +106,7 @@ pub trait MessageWriter<T>
 where
     T: NodeMessage,
 {
-    fn write(&self, message: &Message<T>) -> Result<(), MessageWriterError>;
+    fn write(&mut self, message: Message<T>) -> Result<(), MessageWriterError>;
 }
 
 pub struct StdoutMessageWriter<T>
@@ -140,7 +140,7 @@ impl<T> MessageWriter<T> for StdoutMessageWriter<T>
 where
     T: NodeMessage + serde::Serialize,
 {
-    fn write(&self, message: &Message<T>) -> Result<(), MessageWriterError> {
+    fn write(&mut self, message: Message<T>) -> Result<(), MessageWriterError> {
         let json_str = serde_json::to_string(&message)?;
         Ok(writeln!(std::io::stdout(), "{json_str}")?)
     }

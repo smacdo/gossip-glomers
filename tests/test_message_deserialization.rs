@@ -1,6 +1,6 @@
 mod messages;
 
-use messages::Messages;
+use messages::TestNodeMessage;
 
 use gossip_glomers::Message;
 
@@ -17,13 +17,13 @@ fn parse_simple_maelstrom_message() {
       }
     }
     "#;
-    let m: Message<Messages> = serde_json::from_str(message).unwrap();
+    let m: Message<TestNodeMessage> = serde_json::from_str(message).unwrap();
 
     assert_eq!(m.src(), "alice");
     assert_eq!(m.dest(), "bob");
     assert_eq!(m.msg_id(), Some(345));
     assert_eq!(m.in_reply_to(), Some(123));
-    assert_eq!(m.body(), &Messages::Test);
+    assert_eq!(m.body(), &TestNodeMessage::Test);
 }
 
 #[test]
@@ -40,12 +40,12 @@ fn parse_message_with_typed_fields() {
       }
     }
     "#;
-    let m: Message<Messages> = serde_json::from_str(message).unwrap();
+    let m: Message<TestNodeMessage> = serde_json::from_str(message).unwrap();
 
     assert_eq!(m.src(), "alice");
     assert_eq!(m.dest(), "bob");
     assert_eq!(m.msg_id(), Some(345));
-    assert_eq!(m.body(), &Messages::Test2 { a: 3, b: 22 });
+    assert_eq!(m.body(), &TestNodeMessage::Test2 { a: 3, b: 22 });
 }
 
 #[test]
@@ -61,14 +61,14 @@ fn parse_message_with_string_typed_fields() {
       }
     }
     "#;
-    let m: Message<Messages> = serde_json::from_str(message).unwrap();
+    let m: Message<TestNodeMessage> = serde_json::from_str(message).unwrap();
 
     assert_eq!(m.src(), "alice");
     assert_eq!(m.dest(), "bob");
     assert_eq!(m.msg_id(), Some(345));
     assert_eq!(
         m.body(),
-        &Messages::Echo {
+        &TestNodeMessage::Echo {
             message: "Hello World".to_string()
         }
     );
@@ -88,14 +88,14 @@ fn parse_init_message() {
       }
     }
     "#;
-    let m: Message<Messages> = serde_json::from_str(message).unwrap();
+    let m: Message<TestNodeMessage> = serde_json::from_str(message).unwrap();
 
     assert_eq!(m.src(), "alice");
     assert_eq!(m.dest(), "bob");
     assert_eq!(m.msg_id(), Some(1));
     assert_eq!(
         m.body(),
-        &Messages::Init {
+        &TestNodeMessage::Init {
             node_id: "n3".to_string(),
             node_ids: vec!["n1".to_string(), "n2".to_string(), "n3".to_string()]
         }

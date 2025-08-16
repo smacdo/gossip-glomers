@@ -38,6 +38,14 @@ where
         }
     }
 
+    pub fn node_id(&self) -> Option<&str> {
+        self.node_id.as_deref()
+    }
+
+    pub fn all_node_ids(&self) -> Option<Vec<String>> {
+        self.all_node_ids.clone()
+    }
+
     pub fn run(&mut self) -> Result<(), NodeError> {
         tracing::info!("gossip-glomer echo node started - type 'q' or 'quit' to exit");
 
@@ -100,7 +108,7 @@ where
             T::create_init_ok(),
         );
 
-        self.writer.write(&ok_message)?;
+        self.writer.write(ok_message)?;
 
         Ok(true)
     }

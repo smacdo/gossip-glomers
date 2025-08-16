@@ -1,5 +1,3 @@
-// TODO: use tracing
-
 use clap::Parser;
 use gossip_glomers::{
     NodeMessage,
